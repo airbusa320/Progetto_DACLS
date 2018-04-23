@@ -56,7 +56,7 @@
 #include "MFCC.h"
 //#include "libmfcc.h"
 #include "core_cm4.h"
-#include "data_2.h"
+#include "data.h"
 #include "Cepstrum.h"
 #include "Rete_MLP.h"
 //#include "Canale_destro_sinistro.h"
@@ -92,6 +92,7 @@ void SystemClock_Config(void);
 
 /* USER CODE BEGIN 0 */
 uint16_t FRAME_LENGTH=512;
+uint32_t i;
 /* USER CODE END 0 */
 
 /**
@@ -138,7 +139,7 @@ int main(void)
 
 
 	//	float32_t in[1025]={0},out[NFILT],out2[NFILT];
-
+	//i=0;
 	HAL_UART_Receive_DMA(&huart2,ingresso,1024*2*4*2);
 
 	//for (int var = 0; var < 4; ++var) {
@@ -158,19 +159,21 @@ int main(void)
 	ITM->PORT[0].u8=3;*/
 	//}
 
-marker culo;
-for (int var = 0; var < sizeof(data_2)/4/1024; ++var) {
-	culo= VAD_AE(data_2+var*1024,1024);
-}
+	/*marker culo;
+	for (int var = 0; var < sizeof(data)/4/1024; ++var) {
+		culo= VAD_AE(data+var*1024,1024);
 
-if (culo==ATTIVO) {
-	HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
-HAL_Delay(10);
-}
-else
-{
-	HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_RESET);
-}
+		if (culo==ATTIVO) {
+
+			HAL_Delay(1);
+		}
+		else
+		{
+			HAL_Delay(1);
+		}
+	}*/
+
+
 	//result=MLP(MFCC+1,80,64,64,64);
 
 	//rete_init();
@@ -182,7 +185,7 @@ else
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-while (1)
+	while (1)
 	{
 		/* USER CODE END WHILE */
 
@@ -263,6 +266,8 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 float32_t buffersx[1024],bufferdx[1024],buffersum[1024],bufferdiff[1024];
+marker a;
+uint8_t b;
 void process(uint8_t *in)
 {
 	ITM->PORT[0].u8=33;
@@ -273,13 +278,15 @@ void process(uint8_t *in)
 
 
 	arm_add_f32(bufferdx,buffersx,buffersum,1024);
-	if (VAD_AE(buffersum,1024)==ATTIVO)
-	{
-		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
-		HAL_Delay(1);
-
-		arm_sub_f32(bufferdx,buffersx,bufferdiff,1024);
-	}
+	a=VAD_AE(buffersum,1024);
+	b=(uint8_t)a;
+//	if (VAD_AE(buffersum,1024)==ATTIVO)
+//	{
+//		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
+//		HAL_Delay(1);
+//
+//		arm_sub_f32(bufferdx,buffersx,bufferdiff,1024);
+//	}
 	HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_RESET);
 
 

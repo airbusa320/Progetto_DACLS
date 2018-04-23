@@ -5,7 +5,7 @@
  */
 
 #include "VAD.h"
-
+#define KEEP_ACTIVE 1
 
 float32_t energy_frame;
 uint8_t flag = 0;
@@ -18,7 +18,8 @@ float32_t deltadecay = 1.0005;
 float32_t deltamaxdecay = 1.0001;
 float32_t factor = 0.97;
 marker mark;
-uint8_t inactive_count = 3;
+
+uint8_t inactive_count = KEEP_ACTIVE;
 
 
 marker VAD_AE(float32_t* frame,uint16_t frame_length/*, uint8_t i*/ )
@@ -61,7 +62,7 @@ marker VAD_AE(float32_t* frame,uint16_t frame_length/*, uint8_t i*/ )
 		mark = ATTIVO;
 		inactive_count = 0;}
 	else{
-		if (inactive_count >= 3)
+		if (inactive_count >= KEEP_ACTIVE)
 			mark = NON_ATTIVO;
 
 		else{
