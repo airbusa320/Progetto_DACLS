@@ -5,7 +5,7 @@
  */
 
 #include "VAD.h"
-#define KEEP_ACTIVE 1
+#define KEEP_ACTIVE 3
 
 float32_t energy_frame;
 uint8_t flag = 0;

@@ -56,10 +56,12 @@
 //#include "MFCC.h"
 //#include "libmfcc.h"
 #include "core_cm4.h"
-#include "data.h"
 #include "Cepstrum.h"
 #include "Rete_MLP.h"
+#include "standard.h"
 //#include "Canale_destro_sinistro.h"
+
+#define VAD
 
 /* USER CODE END Includes */
 
@@ -79,6 +81,8 @@ uint8_t result;
 //float32_t mfcc_result[40];
 
 uint8_t ingresso[1024*2*2*4];
+//event_flag evento=0;
+uint8_t evento=0;
 
 /* USER CODE END PV */
 
@@ -134,7 +138,7 @@ int main(void)
 
 
 	//	ITM->PORT[0].u8=0;
-	//	tFiltInit();
+		tFiltInit();
 	//	ITM->PORT[0].u8=0;
 
 
@@ -176,7 +180,7 @@ int main(void)
 
 	//result=MLP(MFCC+1,80,64,64,64);
 
-	//rete_init();
+	rete_init();
 	//event_flag evento=rete(MFCC);
 	//	ITM->PORT[0].u8=3;
 
@@ -280,16 +284,19 @@ void process(uint8_t *in)
 	arm_add_f32(bufferdx,buffersx,buffersum,1024);
 	a=VAD_AE(buffersum,1024);
 
+#ifdef VAD
 	if (a==ATTIVO)
 	{
+#endif
+
 		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
 		//HAL_Delay(1);
 
 		arm_sub_f32(bufferdx,buffersx,bufferdiff,1024);
 
-		powerSpectrum(buffersx,NFFT,bufferpspec);
-		estrazione2(bufferpspec,MFCC,513,NFILT,NMFCC,hfilt);
 		powerSpectrum(bufferdx,NFFT,bufferpspec);
+		estrazione2(bufferpspec,MFCC,513,NFILT,NMFCC,hfilt);
+		powerSpectrum(buffersx,NFFT,bufferpspec);
 		estrazione2(bufferpspec,MFCC+20,513,NFILT,NMFCC,hfilt);
 		powerSpectrum(buffersum,NFFT,bufferpspec);
 		estrazione2(bufferpspec,MFCC+40,513,NFILT,NMFCC,hfilt);
@@ -297,14 +304,18 @@ void process(uint8_t *in)
 		estrazione2(bufferpspec,MFCC+60,513,NFILT,NMFCC,hfilt);
 
 		arm_sub_f32(MFCC, media, bufferpspec,80);
+		arm_mult_f32(bufferpspec,deviazione_standard_inv,MFCC,80);
+		evento=(uint8_t)rete(MFCC);
 
+		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
 
-
+#ifdef VAD
 	}
 	else
 	{
 		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_RESET);
 	}
+#endif
 
 	ITM->PORT[0].u8=34;
 

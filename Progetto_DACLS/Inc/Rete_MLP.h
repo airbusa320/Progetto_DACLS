@@ -30,6 +30,7 @@ typedef enum
 
 typedef enum
 {
+	error=-1,
 	UNO=0,
 	DUE=1,
 	TRE=2,
@@ -40,9 +41,7 @@ typedef enum
 	OTTO=7,
 	NOVE=8,
 	DIECI=9,
-	UNDICI=10,
-	error=-1
-
+	UNDICI=10
 } event_flag;
 
 typedef enum

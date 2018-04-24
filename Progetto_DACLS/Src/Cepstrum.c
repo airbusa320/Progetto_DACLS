@@ -111,7 +111,7 @@ void powerSpectrum(float32_t * pIn, uint16_t len, float32_t * pOut)
 {
 	arm_fir_init_f32(&prem,2,tappi,prestato,len);
 	arm_mult_f32(pIn,hamming_window_1024,buffero,len);
-	arm_fir_f32(&prem,buffero,buffera,len);				// pre enfasi
+	arm_fir_f32(&prem,buffero,buffera,len);			// pre enfasi
 
 	arm_rfft_fast_instance_f32 hfft;
 
