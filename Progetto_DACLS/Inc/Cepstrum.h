@@ -19,10 +19,11 @@
 #include "arm_math.h"
 
 #define FSTART 	0			// Parametri per il calcolo dei
-#define FSTOP 	8000		// coefficienti MFCC
-#define FS 		44100		//
-#define NFFT 	2048			//
+#define FSTOP 	16000		// coefficienti MFCC
+#define FS 		32000		//
+#define NFFT 	1024		//
 #define NFILT 	26			//
+#define NMFCC 	20			//
 
 
 
@@ -49,7 +50,7 @@ void tFiltInit();
 
 void powerSpectrum(float32_t * pIn, uint16_t len, float32_t * pOut);
 void estrazione(float32_t * pIn, float32_t * pOut, uint16_t inLen, uint16_t nFilt, ftri_handle * filtri);
-void estrazione2(float32_t * pIn, float32_t * pOut, uint16_t inLen, uint16_t nFilt, ftri_handle * filtri);
+void estrazione2(float32_t * pIn, float32_t * pOut, uint16_t inLen, uint16_t nFilt, uint16_t nMFFC, ftri_handle * filtri);
 void parametriDCT();
 #endif /* CEPSTRUM_H_ */
 

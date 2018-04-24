@@ -53,7 +53,7 @@
 #include "arm_math.h"
 #include "arm_const_structs.h"
 //#include "data_spectrum.h"
-#include "MFCC.h"
+//#include "MFCC.h"
 //#include "libmfcc.h"
 #include "core_cm4.h"
 #include "data.h"
@@ -266,8 +266,8 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 float32_t buffersx[1024],bufferdx[1024],buffersum[1024],bufferdiff[1024];
+float32_t bufferpspec[513],MFCC[80];
 marker a;
-uint8_t b;
 void process(uint8_t *in)
 {
 	ITM->PORT[0].u8=33;
@@ -279,16 +279,29 @@ void process(uint8_t *in)
 
 	arm_add_f32(bufferdx,buffersx,buffersum,1024);
 	a=VAD_AE(buffersum,1024);
-	b=(uint8_t)a;
-//	if (VAD_AE(buffersum,1024)==ATTIVO)
-//	{
-//		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
-//		HAL_Delay(1);
-//
-//		arm_sub_f32(bufferdx,buffersx,bufferdiff,1024);
-//	}
-	HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_RESET);
 
+	if (a==ATTIVO)
+	{
+		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
+		//HAL_Delay(1);
+
+		arm_sub_f32(bufferdx,buffersx,bufferdiff,1024);
+
+		powerSpectrum(buffersx,NFFT,bufferpspec);
+		estrazione2(bufferpspec,MFCC,513,NFILT,NMFCC,hfilt);
+		powerSpectrum(bufferdx,NFFT,bufferpspec);
+		estrazione2(bufferpspec,MFCC+20,513,NFILT,NMFCC,hfilt);
+		powerSpectrum(buffersum,NFFT,bufferpspec);
+		estrazione2(bufferpspec,MFCC+40,513,NFILT,NMFCC,hfilt);
+		powerSpectrum(bufferdiff,NFFT,bufferpspec);
+		estrazione2(bufferpspec,MFCC+60,513,NFILT,NMFCC,hfilt);
+
+
+	}
+	else
+	{
+		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_RESET);
+	}
 
 	ITM->PORT[0].u8=34;
 
