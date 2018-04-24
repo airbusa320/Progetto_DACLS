@@ -296,6 +296,9 @@ void process(uint8_t *in)
 		powerSpectrum(bufferdiff,NFFT,bufferpspec);
 		estrazione2(bufferpspec,MFCC+60,513,NFILT,NMFCC,hfilt);
 
+		arm_sub_f32(MFCC, media, bufferpspec,80);
+
+
 
 	}
 	else
