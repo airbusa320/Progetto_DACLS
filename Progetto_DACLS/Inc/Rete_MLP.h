@@ -74,6 +74,8 @@ mlp_status rete_init();
 
 event_flag maxind(float32_t * prob, uint16_t len);
 
+const char* getEventName(event_flag eve);
+
 #endif /* RETE_MLP_H_ */
 
 

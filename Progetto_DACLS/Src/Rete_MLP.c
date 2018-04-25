@@ -236,3 +236,27 @@ void softmax(float32_t* in, float32_t* out,uint16_t len)
 	}
 	arm_scale_f32(out,(1.0f)/temp,out,len);
 }
+
+
+const char* getEventName(event_flag eve)
+{
+   switch (eve)
+   {
+      case UNO: return "Uno";
+      case DUE: return "Due";
+      case TRE: return "Tre" ;
+      case QUATTRO: return "Quattro" ;
+      case CINQUE: return "Cinque" ;
+      case SEI: return "Sei" ;
+      case SETTE: return "Sette" ;
+      case OTTO: return "Otto" ;
+      case NOVE: return "Nove" ;
+      case DIECI: return "Dieci" ;
+      case UNDICI: return "Undici" ;
+      default: return "rotto";
+   }
+
+
+}
+
+

@@ -75,6 +75,7 @@
 
 
 uint8_t result;
+char stringa[10]={0};
 //uint8_t mark[158];
 
 //uint8_t coeff = 1;
@@ -306,6 +307,10 @@ void process(uint8_t *in)
 		arm_sub_f32(MFCC, media, bufferpspec,80);
 		arm_mult_f32(bufferpspec,deviazione_standard_inv,MFCC,80);
 		evento=(uint8_t)rete(MFCC);
+
+		sprintf(stringa,"%s",getEventName(evento));
+
+		HAL_UART_Transmit(&huart2,&stringa,sizeof(stringa),1000);
 
 		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
 
