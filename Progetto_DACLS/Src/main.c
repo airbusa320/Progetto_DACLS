@@ -75,13 +75,14 @@
 
 
 uint8_t result;
-char stringa[10]={0};
+uint8_t stringa[10]={0};
 //uint8_t mark[158];
 
 //uint8_t coeff = 1;
 //float32_t mfcc_result[40];
 
-uint8_t ingresso[1024*2*2*4];
+uint8_t ingresso[1024*2/**2*/*4];
+uint8_t framebuff[1024*2/**2*/*4];
 //event_flag evento=0;
 uint8_t evento=0;
 
@@ -145,7 +146,7 @@ int main(void)
 
 	//	float32_t in[1025]={0},out[NFILT],out2[NFILT];
 	//i=0;
-	HAL_UART_Receive_DMA(&huart2,ingresso,1024*2*4*2);
+	HAL_UART_Receive_DMA(&huart2,ingresso,1024*2*4/**2*/);
 
 	//for (int var = 0; var < 4; ++var) {
 
@@ -275,7 +276,7 @@ float32_t bufferpspec[513],MFCC[80];
 marker a;
 void process(uint8_t *in)
 {
-	ITM->PORT[0].u8=33;
+
 	for (int var = 0; var < 1024; var++) {
 		buffersx[var]=((float32_t*)in)[var*2];
 		bufferdx[var]=((float32_t*)in)[(var*2)+1];
@@ -308,9 +309,9 @@ void process(uint8_t *in)
 		arm_mult_f32(bufferpspec,deviazione_standard_inv,MFCC,80);
 		evento=(uint8_t)rete(MFCC);
 
-		sprintf(stringa,"%s",getEventName(evento));
+		sprintf((char*)stringa,"%s",getEventName(evento));
 
-		HAL_UART_Transmit(&huart2,&stringa,sizeof(stringa),1000);
+		HAL_UART_Transmit(&huart2,stringa,sizeof(stringa),1000);
 
 		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
 
@@ -322,19 +323,26 @@ void process(uint8_t *in)
 	}
 #endif
 
-	ITM->PORT[0].u8=34;
+
 
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-
-	process(&ingresso[2048*4]);
+	ITM->PORT[0].u8=33;
+	arm_copy_f32 ((float32_t*)ingresso, (float32_t*)framebuff, 512);
+	arm_copy_f32 (((float32_t*)ingresso)+512, ((float32_t*)framebuff)+512, 512);
+	process(framebuff);
+	ITM->PORT[0].u8=34;
 }
 
 void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 {
-	process(&ingresso[0]);
+	ITM->PORT[0].u8=33;
+	arm_copy_f32 (((float32_t*)ingresso)+512, (float32_t*)framebuff, 512);
+	arm_copy_f32 ((float32_t*)ingresso, ((float32_t*)framebuff)+512, 512);
+	process(framebuff);
+	ITM->PORT[0].u8=34;
 }
 
 /* USER CODE END 4 */
