@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-<ProjectName>C:\Users\Riccardo\Atollic\TrueSTUDIO\STM32_workspace_9.0\Progetto_DACLS\\Progetto_DACLS</ProjectName>
+<ProjectName>C:\Users\Riccardo\git\Progetto_DACLS\Progetto_DACLS\\Progetto_DACLS</ProjectName>
 <ProjectNature>C</ProjectNature> 
 <CMSIS>..\Drivers\CMSIS</CMSIS>
-<HAL_Driver>C:\Users\Riccardo\STM32Cube\Repository\STM32Cube_FW_F4_V1.19.0\Drivers\CMSIS</HAL_Driver>
+<HAL_Driver>C:\Users\Riccardo\STM32Cube\Repository\STM32Cube_FW_F4_V1.21.0\Drivers\CMSIS</HAL_Driver>
 <Toolchain>TrueSTUDIO</Toolchain>
 <Version>0</Version>
 
@@ -31,7 +31,7 @@
 			
     <usedDebug>true</usedDebug>
     	<debugprobe>swd</debugprobe>
-    <optimization>2</optimization>
+    <optimization></optimization>
     <icfloc>0</icfloc>
     <Adefines>
         <define></define>
@@ -60,6 +60,7 @@
 	<Cincludes>
 	   <include>..\Inc</include>
 	   <include>..\Drivers\STM32F4xx_HAL_Driver\Inc</include>
+	   <include>..\Middlewares\ST\STM32_Audio\Addons\PDM\Inc</include>
 	   <include>..\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy</include>
 	   <include>..\Drivers\CMSIS\Device\ST\STM32F4xx\Include</include>
 	   <include>..\Drivers\CMSIS\Include</include>
@@ -81,6 +82,20 @@
 		    	<sourceEntry>
 		    		<name>Drivers</name>
 		    	</sourceEntry>
+		    		<sourceEntry>
+		    			<name>Middlewares</name>
+		    		</sourceEntry>
 		    </sourceEntries>
+          <group>
+          <name>Middlewares</name>
+
+                              <group>
+                                  <name>PDMFilter</name>
+                                  <file>
+                                          <name>../Middlewares/ST/STM32_Audio/Addons/PDM/Lib/libPDMFilter_CM4_GCC.a</name>
+                                  </file>
+                              </group>
+
+          </group> 
 
 </Project>

@@ -104,7 +104,7 @@ mlp_status rete_init()
 	hlayer[0].nin=80;
 	hlayer[0].pesi.numCols=hlayer[0].nin+1;
 	hlayer[0].pesi.numRows=hlayer[0].len;
-	hlayer[0].pesi.pData=Weight_array;
+	hlayer[0].pesi.pData=(float32_t *)Weight_array;
 
 	hlayer[1].activation=TANH;
 	hlayer[1].len=64;
@@ -131,7 +131,7 @@ mlp_status rete_init()
 
 }
 
-float32_t buffer[128];
+float32_t buffer[200];
 
 /* calcola l'uscita del layer
  * handle: puntatore al handle
@@ -181,7 +181,7 @@ mlp_status layer(mlp_handle* handle, float32_t *in, float32_t *out )
 
 event_flag rete(float32_t * in)
 {
-	float32_t temp[65],temp2[65]; // buffer provvisori
+	float32_t temp[200],temp2[200]; // buffer provvisori
 
 	if (layer(&hlayer[0],in,temp)!= TUTTO_OK)
 	{

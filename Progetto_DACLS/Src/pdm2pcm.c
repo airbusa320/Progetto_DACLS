@@ -1,8 +1,8 @@
 /**
-  ******************************************************************************
-  * @file           : main.h
-  * @brief          : Header for main.c file.
-  *                   This file contains the common defines of the application.
+ ******************************************************************************
+  * File Name          : pdm2pcm.c
+  * Description        : This file provides code for the configuration
+  *                      of the pdm2pcm instances.
   ******************************************************************************
   * This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
@@ -47,62 +47,68 @@
   ******************************************************************************
   */
 
-/* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H__
-#define __MAIN_H__
-
 /* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "pdm2pcm.h"
 
-/* USER CODE BEGIN Includes */
+/* USER CODE BEGIN 0 */
+/* USER CODE END 0 */
 
-/* USER CODE END Includes */
+/* Global variables ---------------------------------------------------------*/
+PDM_Filter_Handler_t PDM1_filter_handler;
+PDM_Filter_Config_t PDM1_filter_config;
 
-/* Private define ------------------------------------------------------------*/
-#define FclkMEMS 2048000*2
-#define I2Sfreq FclkMEMS*2/(32*2)
-#define I2Sbufflen (FclkMEMS/1000/16)*2*Framelen
-#define PCMbufflen (16000/1000)*2*Framelen
-#define PDMbufflen I2Sbufflen
-#define Framelen 32/2
+/* USER CODE BEGIN 1 */
+/* USER CODE END 1 */
 
-#define B1_Pin GPIO_PIN_13
-#define B1_GPIO_Port GPIOC
-#define USART_TX_Pin GPIO_PIN_2
-#define USART_TX_GPIO_Port GPIOA
-#define USART_RX_Pin GPIO_PIN_3
-#define USART_RX_GPIO_Port GPIOA
-#define LD2_Pin GPIO_PIN_5
-#define LD2_GPIO_Port GPIOA
-#define TMS_Pin GPIO_PIN_13
-#define TMS_GPIO_Port GPIOA
-#define TCK_Pin GPIO_PIN_14
-#define TCK_GPIO_Port GPIOA
-#define SWO_Pin GPIO_PIN_3
-#define SWO_GPIO_Port GPIOB
+/* PDM2PCM init function */
+void MX_PDM2PCM_Init(void)
+{
+  /* USER CODE BEGIN 2 */
+  /* USER CODE END 2 */
 
-/* ########################## Assert Selection ############################## */
-/**
-  * @brief Uncomment the line below to expanse the "assert_param" macro in the 
-  *        HAL drivers code
+   /** 
   */
-/* #define USE_FULL_ASSERT    1U */
+  PDM1_filter_handler.bit_order = PDM_FILTER_BIT_ORDER_MSB;
+  PDM1_filter_handler.endianness = PDM_FILTER_ENDIANNESS_BE;
+  PDM1_filter_handler.high_pass_tap = 2104533974;
+  PDM1_filter_handler.in_ptr_channels = 2;
+  PDM1_filter_handler.out_ptr_channels = 1; 
+  PDM_Filter_Init(&PDM1_filter_handler);
 
-/* USER CODE BEGIN Private defines */
+  PDM1_filter_config.decimation_factor = PDM_FILTER_DEC_FACTOR_128;
+  PDM1_filter_config.output_samples_number = Framelen;
+  PDM1_filter_config.mic_gain = 0; 
+  PDM_Filter_setConfig(&PDM1_filter_handler, &PDM1_filter_config);
 
-#define VAD
+  /* USER CODE BEGIN 3 */
+  /* USER CODE END 3 */
 
-/* USER CODE END Private defines */
-
-#ifdef __cplusplus
- extern "C" {
-#endif
-void _Error_Handler(char *, int);
-
-#define Error_Handler() _Error_Handler(__FILE__, __LINE__)
-#ifdef __cplusplus
 }
-#endif
 
-#endif /* __MAIN_H__ */
+/* USER CODE BEGIN 4 */
+
+/*  process function */
+uint8_t MX_PDM2PCM_Process(uint16_t *PDMBuf, uint16_t *PCMBuf)
+{
+  /*
+  uint8_t BSP_AUDIO_IN_PDMToPCM(uint16_t * PDMBuf, uint16_t * PCMBuf)
+
+  Converts audio format from PDM to PCM.
+  Parameters:
+    PDMBuf : Pointer to PDM buffer data
+    PCMBuf : Pointer to PCM buffer data
+  Return values:
+    AUDIO_OK in case of success, AUDIO_ERROR otherwise
+  */
+  /* this example return the default status AUDIO_ERROR */
+  return (uint8_t) 1;
+}
+
+/* USER CODE END 4 */
+
+/**
+  * @}
+  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
