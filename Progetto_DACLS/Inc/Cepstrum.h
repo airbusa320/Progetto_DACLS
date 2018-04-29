@@ -44,7 +44,7 @@ typedef struct {
 ftri_handle hfilt[NFILT];
 
 arm_fir_instance_f32 prem;
-float32_t prestato[2049];
+float32_t prestato[1025];
 
 void tFiltInit();
 
