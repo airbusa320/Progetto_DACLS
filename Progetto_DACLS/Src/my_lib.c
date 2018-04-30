@@ -15,7 +15,7 @@
 #include "tim.h"
 //#include "stdlib.h"
 
-volatile uint16_t I2S_InternalBuffer[(I2Sbufflen*2)]={0}; //1ms(?) i2s buffer
+volatile uint16_t I2S_InternalBuffer[(I2Sbufflen*2)]={0};
 volatile uint16_t PDMbuff[PDMbufflen]={0};
 volatile uint16_t PCMbuffsx[PCMbufflen]={0};
 volatile uint16_t PCMbuffdx[PCMbufflen]={0};
@@ -68,7 +68,7 @@ void AudioProcess(uint8_t *PDMBuf, uint8_t *PCMBuf)
 
 void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
 {
-	HAL_I2S_DMAPause(hi2s);
+	//HAL_I2S_DMAPause(hi2s);
 	ITM->PORT[0].u8=10;
 
 
@@ -90,14 +90,14 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
 	Process();
 
 	ITM->PORT[0].u8=11;
-	HAL_I2S_DMAResume(hi2s);
+	//HAL_I2S_DMAResume(hi2s);
 }
 
 
 
 void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s)
 {
-	HAL_I2S_DMAPause(hi2s);
+	//HAL_I2S_DMAPause(hi2s);
 	uint32_t index = 0;
 
 	volatile uint16_t * DataTempI2S = I2S_InternalBuffer;
@@ -114,7 +114,7 @@ void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s)
 
 	Process();
 
-	HAL_I2S_DMAResume(hi2s);
+	//HAL_I2S_DMAResume(hi2s);
 }
 
 void int2float(int16_t * psrc, float32_t * pDst, uint16_t size)
@@ -177,12 +177,16 @@ void Process()
 
 		powerSpectrum(framedx,NFFT,bufferpspec);
 		estrazione2(bufferpspec,MFCC,513,NFILT,NMFCC,hfilt);
+
 		powerSpectrum(framesx,NFFT,bufferpspec);
 		estrazione2(bufferpspec,MFCC+20,513,NFILT,NMFCC,hfilt);
+
 		powerSpectrum(framesum,NFFT,bufferpspec);
 		estrazione2(bufferpspec,MFCC+40,513,NFILT,NMFCC,hfilt);
+
 		powerSpectrum(framediff,NFFT,bufferpspec);
 		estrazione2(bufferpspec,MFCC+60,513,NFILT,NMFCC,hfilt);
+
 
 		arm_sub_f32(MFCC, (float32_t*)media, bufferpspec,80);
 		arm_mult_f32(bufferpspec, (float32_t*)deviazione_standard_inv,MFCC,80);
@@ -192,9 +196,10 @@ void Process()
 
 		//HAL_UART_Transmit(&huart2,stringa,sizeof(stringa),1000);
 
+#ifdef VAD
 		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
 
-#ifdef VAD
+
 	}
 	else
 	{

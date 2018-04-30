@@ -100,29 +100,29 @@ uint8_t MLP(float32_t* MFcc, uint8_t Lenght_MFcc, uint8_t i,uint8_t t,uint8_t l 
 mlp_status rete_init()
 {
 	hlayer[0].activation=TANH;
-	hlayer[0].len=64;
+	hlayer[0].len=180;
 	hlayer[0].nin=80;
 	hlayer[0].pesi.numCols=hlayer[0].nin+1;
 	hlayer[0].pesi.numRows=hlayer[0].len;
 	hlayer[0].pesi.pData=(float32_t *)Weight_array;
 
 	hlayer[1].activation=TANH;
-	hlayer[1].len=64;
-	hlayer[1].nin=64;
+	hlayer[1].len=180;
+	hlayer[1].nin=180;
 	hlayer[1].pesi.numCols=hlayer[1].nin+1;
 	hlayer[1].pesi.numRows=hlayer[1].len;
 	hlayer[1].pesi.pData=hlayer[0].pesi.pData+((hlayer[0].nin+1)*hlayer[0].len);
 
 	hlayer[2].activation=TANH;
-	hlayer[2].len=64;
-	hlayer[2].nin=64;
+	hlayer[2].len=180;
+	hlayer[2].nin=180;
 	hlayer[2].pesi.numCols=hlayer[2].nin+1;
 	hlayer[2].pesi.numRows=hlayer[2].len;
 	hlayer[2].pesi.pData=hlayer[1].pesi.pData+((hlayer[1].nin+1)*hlayer[1].len);
 
 	hlayer[3].activation=SOFTMAX;
 	hlayer[3].len=11;
-	hlayer[3].nin=64;
+	hlayer[3].nin=180;
 	hlayer[3].pesi.numCols=hlayer[3].nin+1;
 	hlayer[3].pesi.numRows=hlayer[3].len;
 	hlayer[3].pesi.pData=hlayer[2].pesi.pData+((hlayer[2].nin+1)*hlayer[2].len);
