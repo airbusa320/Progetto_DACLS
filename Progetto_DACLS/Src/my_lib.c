@@ -15,7 +15,7 @@
 #include "tim.h"
 //#include "stdlib.h"
 
-volatile uint16_t I2S_InternalBuffer[(I2Sbufflen*2)]={0};
+volatile uint16_t I2S_InternalBuffer[(I2Sbufflen*2)]={0}; // Input buffer
 volatile uint16_t PDMbuff[PDMbufflen]={0};
 volatile uint16_t PCMbuffsx[PCMbufflen]={0};
 volatile uint16_t PCMbuffdx[PCMbufflen]={0};
@@ -46,75 +46,69 @@ const uint8_t CHANNEL_DEMUX_MASK=0x55;
 
 
 
-
+/*
+ * Avvia la generazione del clock, attende un periodo di stabilizzazione
+ * e avvia l'acquisizione dei dati dai microfoni tramite DMA
+ */
 void StartAcquisition()
 {
-	//ITM->PORT[0].u8=33;
 	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);
 	HAL_Delay(250);
 	HAL_I2S_Receive_DMA(&hi2s2,(uint16_t *)I2S_InternalBuffer,I2Sbufflen);
 }
 
 
-void AudioProcess(uint8_t *PDMBuf, uint8_t *PCMBuf)
+void PDM2PCM(uint8_t *PDMBuf, uint8_t *PCMBuf)
 {
-	//PDM_Filter((uint16_t *)PDMBuf,(uint16_t *)PCMBuf,&hfiltro);
-
 	PDM_Filter((PDMBuf),(PCMBuf),&PDM1_filter_handler);
-
 }
 
 
-
+/*
+ * Funzione che viene chiamata quando il DMA riempie la seconda metà del buffer
+ */
 void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
 {
-	//HAL_I2S_DMAPause(hi2s);
-	ITM->PORT[0].u8=10;
-
-
 	uint32_t index = 0;
 
 	volatile uint16_t * DataTempI2S = &(I2S_InternalBuffer[I2Sbufflen]);
 	uint8_t a,b=0;
-	for(index=0; index<I2Sbufflen; index++) {
+	for(index=0; index<I2Sbufflen; index++) // deinterlacciamento bit
+	{
 		a = ((uint8_t *)(DataTempI2S))[(index*2)];
 		b = ((uint8_t *)(DataTempI2S))[(index*2)+1];
 		((uint8_t *)(PDMbuff))[(index*2)] = Channel_Demux[a & CHANNEL_DEMUX_MASK] | Channel_Demux[b & CHANNEL_DEMUX_MASK] << 4;;
 		((uint8_t *)(PDMbuff))[(index*2)+1] = Channel_Demux[(a>>1) & CHANNEL_DEMUX_MASK] |Channel_Demux[(b>>1) & CHANNEL_DEMUX_MASK] << 4;
-
 	}
 
-	AudioProcess((uint8_t *)PDMbuff, (uint8_t *)PCMbuffsx);
-	AudioProcess((uint8_t *)PDMbuff+1, (uint8_t *)PCMbuffdx);
+	PDM2PCM((uint8_t *)PDMbuff, (uint8_t *)PCMbuffsx);
+	PDM2PCM((uint8_t *)PDMbuff+1, (uint8_t *)PCMbuffdx);
 
 	Process();
-
-	ITM->PORT[0].u8=11;
-	//HAL_I2S_DMAResume(hi2s);
 }
 
 
-
+/*
+ * Funzione che viene chiamata quando il DMA riempie la prima metà del buffer
+ */
 void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s)
 {
-	//HAL_I2S_DMAPause(hi2s);
 	uint32_t index = 0;
 
 	volatile uint16_t * DataTempI2S = I2S_InternalBuffer;
 	uint8_t a,b=0;
-	for(index=0; index<I2Sbufflen; index++) {
+	for(index=0; index<I2Sbufflen; index++) // deinterlacciamento bit
+	{
 		a = ((uint8_t *)(DataTempI2S))[(index*2)];
 		b = ((uint8_t *)(DataTempI2S))[(index*2)+1];
 		((uint8_t *)(PDMbuff))[(index*2)] = Channel_Demux[a & CHANNEL_DEMUX_MASK] | Channel_Demux[b & CHANNEL_DEMUX_MASK] << 4;;
 		((uint8_t *)(PDMbuff))[(index*2)+1] = Channel_Demux[(a>>1) & CHANNEL_DEMUX_MASK] | Channel_Demux[(b>>1) & CHANNEL_DEMUX_MASK] << 4;
-
 	}
-	AudioProcess((uint8_t *)PDMbuff, (uint8_t *)PCMbuffsx);
-	AudioProcess((uint8_t *)PDMbuff+1, (uint8_t *)PCMbuffdx);
+
+	PDM2PCM((uint8_t *)PDMbuff, (uint8_t *)PCMbuffsx);
+	PDM2PCM((uint8_t *)PDMbuff+1, (uint8_t *)PCMbuffdx);
 
 	Process();
-
-	//HAL_I2S_DMAResume(hi2s);
 }
 
 void int2float(int16_t * psrc, float32_t * pDst, uint16_t size)
@@ -147,8 +141,10 @@ void int2float(int16_t * psrc, float32_t * pDst, uint16_t size)
 	}
 }
 
-
+#ifdef VAD
 marker a;
+#endif
+
 float32_t bufferpspec[513],MFCC[80];
 uint8_t stringa[10]={0};
 uint8_t evento=0;
@@ -162,48 +158,45 @@ void Process()
 
 
 	arm_add_f32(framedx,framesx,framesum,1024);		// calcola il canale somma
-	a=VAD_AE(framesum,1024);	// valuta l'attivazione del frame
-
 
 #ifdef VAD
+	a=VAD_AE(framesum,1024);	// valuta l'attivazione del frame
+
 	if (a==ATTIVO)
 	{
 #endif
 
-		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
-		//HAL_Delay(1);
+		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);	// LD2 on
 
-		arm_sub_f32(framedx,framesx,framediff,1024);
+		arm_sub_f32(framedx,framesx,framediff,1024);// calcola il canale differenza
 
+		// estrazione delle feature dai 4 canali
 		powerSpectrum(framedx,NFFT,bufferpspec);
-		estrazione2(bufferpspec,MFCC,513,NFILT,NMFCC,hfilt);
+		estrazione(bufferpspec,MFCC,513,NFILT,NMFCC,hfilt);
 
 		powerSpectrum(framesx,NFFT,bufferpspec);
-		estrazione2(bufferpspec,MFCC+20,513,NFILT,NMFCC,hfilt);
+		estrazione(bufferpspec,MFCC+20,513,NFILT,NMFCC,hfilt);
 
 		powerSpectrum(framesum,NFFT,bufferpspec);
-		estrazione2(bufferpspec,MFCC+40,513,NFILT,NMFCC,hfilt);
+		estrazione(bufferpspec,MFCC+40,513,NFILT,NMFCC,hfilt);
 
 		powerSpectrum(framediff,NFFT,bufferpspec);
-		estrazione2(bufferpspec,MFCC+60,513,NFILT,NMFCC,hfilt);
+		estrazione(bufferpspec,MFCC+60,513,NFILT,NMFCC,hfilt);
 
 
+		// standardizzazione feature
 		arm_sub_f32(MFCC, (float32_t*)media, bufferpspec,80);
 		arm_mult_f32(bufferpspec, (float32_t*)deviazione_standard_inv,MFCC,80);
 		evento=(uint8_t)rete(MFCC);
 
-		//sprintf((char*)stringa,"%s",getEventName(evento));
-
-		//HAL_UART_Transmit(&huart2,stringa,sizeof(stringa),1000);
+		sprintf((char*)stringa,"%s",getEventName(evento));
+		HAL_UART_Transmit(&huart2,stringa,sizeof(stringa),1000);
 
 #ifdef VAD
-		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
-
-
 	}
 	else
 	{
-		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_RESET);	// LD2 off
 	}
 #endif
 

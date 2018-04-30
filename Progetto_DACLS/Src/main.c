@@ -62,7 +62,6 @@
 #include "core_cm4.h"
 #include "Cepstrum.h"
 #include "Rete_MLP.h"
-
 #include "my_lib.h"
 
 
@@ -134,17 +133,10 @@ int main(void)
 
 
 
+	tFiltInit();			// Inizializza l'estrazione delle feature
+	rete_init();			// Inizializza la rete
 
-
-	//	ITM->PORT[0].u8=0;
-	tFiltInit();
-	//	ITM->PORT[0].u8=0;
-
-
-
-	rete_init();
-
-	StartAcquisition();
+	StartAcquisition();		// Avvia l'acquisizione
 
 	/* USER CODE END 2 */
 

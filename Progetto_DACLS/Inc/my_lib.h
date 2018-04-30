@@ -27,5 +27,6 @@ enum
 void StartAcquisition();
 void int2float(int16_t * psrc, float32_t * pDst, uint16_t size);
 void Process();
+void PDM2PCM(uint8_t *PDMBuf, uint8_t *PCMBuf);
 
 #endif /* MY_LIB_H_ */

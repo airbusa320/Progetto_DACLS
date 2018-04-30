@@ -174,7 +174,7 @@ void filtraggi(
  * nFilt:	numero di filtri
  * filtri:	puntatore all'array di handle dei filtri
  */
-void estrazione(
+void estrazionevecchio(
 		float32_t * pIn,
 		float32_t * pOut,
 		uint16_t inLen,
@@ -223,12 +223,15 @@ void estrazione(
 }
 
 
-void prenfasi()
-{
 
-}
-
-void estrazione2(
+/* applica i filtri calcolati al frame e calcola gli MFCC
+ * pIn: 	puntatore al frame
+ * pOut: 	puntatore al buffer di uscita, lungo nFilt
+ * inLen: 	lunghezza del frame
+ * nFilt:	numero di filtri
+ * filtri:	puntatore all'array di handle dei filtri
+ */
+void estrazione(
 		float32_t * pIn,
 		float32_t * pOut,
 		uint16_t inLen,
