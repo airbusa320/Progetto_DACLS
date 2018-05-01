@@ -128,7 +128,6 @@ mlp_status rete_init()
 	hlayer[3].pesi.pData=hlayer[2].pesi.pData+((hlayer[2].nin+1)*hlayer[2].len);
 
 	return TUTTO_OK;
-
 }
 
 float32_t buffer[200];
@@ -240,23 +239,21 @@ void softmax(float32_t* in, float32_t* out,uint16_t len)
 
 const char* getEventName(event_flag eve)
 {
-   switch (eve)
-   {
-      case UNO: return "Uno";
-      case DUE: return "Due";
-      case TRE: return "Tre" ;
-      case QUATTRO: return "Quattro" ;
-      case CINQUE: return "Cinque" ;
-      case SEI: return "Sei" ;
-      case SETTE: return "Sette" ;
-      case OTTO: return "Otto" ;
-      case NOVE: return "Nove" ;
-      case DIECI: return "Dieci" ;
-      case UNDICI: return "Undici" ;
-      default: return "rotto";
-   }
-
-
+	switch (eve)
+	{
+	case RUSTLING: 		return "(object) Rustling";
+	case SNAPPING: 		return "(object) Snapping";
+	case CUPBOARD: 		return "Cupboard";
+	case CUTLERY: 		return "Cutlery";
+	case DISHES: 		return "Dishes";
+	case DRAWER: 		return "Drawer";
+	case GLASS: 		return "Glass jingling";
+	case IMPACT: 		return "Object impact";
+	case WALKING: 		return "People walking";
+	case WASHINGDISHES: return "Washingdishes";
+	case WATERTAP: 		return "Water tap running";
+	default: 			return "rotto";
+	}
 }
 
 

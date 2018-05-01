@@ -48,10 +48,10 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
 #include "pdm2pcm.h"
 
 /* USER CODE BEGIN 0 */
+#include "main.h"
 /* USER CODE END 0 */
 
 /* Global variables ---------------------------------------------------------*/
@@ -76,8 +76,8 @@ void MX_PDM2PCM_Init(void)
   PDM1_filter_handler.out_ptr_channels = 1; 
   PDM_Filter_Init(&PDM1_filter_handler);
 
-  PDM1_filter_config.decimation_factor = PDM_FILTER_DEC_FACTOR_128;
-  PDM1_filter_config.output_samples_number = Framelen;
+  PDM1_filter_config.decimation_factor = PDM_FILTER_DEC_FACTOR_80;
+  PDM1_filter_config.output_samples_number = 32 * Framelen;
   PDM1_filter_config.mic_gain = 0; 
   PDM_Filter_setConfig(&PDM1_filter_handler, &PDM1_filter_config);
 

@@ -58,7 +58,7 @@
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
-#define FclkMEMS 2048000*2
+#define FclkMEMS 2560000
 #define I2Sfreq FclkMEMS*2/(32*2)
 #define I2Sbufflen (FclkMEMS/1000/16)*2*Framelen
 #define PCMbufflen (16000/1000)*2*Framelen

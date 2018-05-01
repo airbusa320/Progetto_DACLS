@@ -255,22 +255,15 @@ void estrazione(
 			*(temp2+n)+=*(tempdisp+i+(filtri+n)->fstart);
 
 		}
-		*(temp2+n)=logf(*(temp2+n));
+		*(temp2+n)=log10f(*(temp2+n));
 
-
-
-
-
-		//arm_fill_f32(0.0f,filtrato,inLen);	// riempie l'array temp di 0
-		//arm_copy_f32(&(temppari[(filtri+n+1)->fstart]),&filtrato[(filtri+n+1)->fstart],(filtri+n+1)->len);
-		// copia il filtro ennesimo in temp al punto giusto
 		*(temp2+n+1)=0;
 		for (int i = 0; i < (filtri+n+1)->len; ++i) 	 	// somma tutti i campioni e
 		{									 	// calcola il log
 			*(temp2+n+1)+=*(temppari+i+(filtri+n+1)->fstart);
 
 		}
-		*(temp2+n+1)=logf(*(temp2+n+1));
+		*(temp2+n+1)=log10f(*(temp2+n+1));
 	}
 
 	arm_matrix_instance_f32 DCTPMat={NFILT, NFILT, DCTParam};

@@ -72,7 +72,7 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
 	uint32_t index = 0;
 
 	volatile uint16_t * DataTempI2S = &(I2S_InternalBuffer[I2Sbufflen]);
-	uint8_t a,b=0;
+	uint8_t a=0,b=0;
 	for(index=0; index<I2Sbufflen; index++) // deinterlacciamento bit
 	{
 		a = ((uint8_t *)(DataTempI2S))[(index*2)];
@@ -96,7 +96,7 @@ void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s)
 	uint32_t index = 0;
 
 	volatile uint16_t * DataTempI2S = I2S_InternalBuffer;
-	uint8_t a,b=0;
+	uint8_t a=0,b=0;
 	for(index=0; index<I2Sbufflen; index++) // deinterlacciamento bit
 	{
 		a = ((uint8_t *)(DataTempI2S))[(index*2)];
@@ -146,8 +146,9 @@ marker a;
 #endif
 
 float32_t bufferpspec[513],MFCC[80];
-uint8_t stringa[10]={0};
+uint8_t stringa[20]={0};
 uint8_t evento=0;
+uint8_t len;
 void Process()
 {
 
@@ -189,8 +190,8 @@ void Process()
 		arm_mult_f32(bufferpspec, (float32_t*)deviazione_standard_inv,MFCC,80);
 		evento=(uint8_t)rete(MFCC);
 
-		sprintf((char*)stringa,"%s",getEventName(evento));
-		HAL_UART_Transmit(&huart2,stringa,sizeof(stringa),1000);
+		len=sprintf((char*)stringa,"%s\n",getEventName(evento));
+		HAL_UART_Transmit(&huart2,stringa,len,1000);
 
 #ifdef VAD
 	}
