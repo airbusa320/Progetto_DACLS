@@ -14,4 +14,4 @@ Per compilare e caricare il firmware è sufficiente avere installata sul proprio
 
 ## Licenza
 
-Questo progetto è rilasciato con licenza GPL v3.0 - [LICENSE.md](LICENSE.md)
+Questo progetto è rilasciato con licenza GPL v3.0 - [LICENSE](LICENSE)
