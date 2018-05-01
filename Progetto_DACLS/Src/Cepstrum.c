@@ -109,8 +109,8 @@ float32_t buffero[NFFT+2], buffera[NFFT];
  */
 void powerSpectrum(float32_t * pIn, uint16_t len, float32_t * pOut)
 {
-	arm_fir_init_f32(&prem,2,(float32_t*)tappi,prestato,len);
-	arm_mult_f32(pIn,(float32_t*)hamming_window_1024,buffero,len);
+	arm_fir_init_f32(&prem,2,tappi,prestato,len);
+	arm_mult_f32(pIn,hamming_window_1024,buffero,len);
 	arm_fir_f32(&prem,buffero,buffera,len);			// pre enfasi
 
 	arm_rfft_fast_instance_f32 hfft;
@@ -174,7 +174,7 @@ void filtraggi(
  * nFilt:	numero di filtri
  * filtri:	puntatore all'array di handle dei filtri
  */
-void estrazionevecchio(
+void estrazione(
 		float32_t * pIn,
 		float32_t * pOut,
 		uint16_t inLen,
@@ -223,15 +223,12 @@ void estrazionevecchio(
 }
 
 
+void prenfasi()
+{
 
-/* applica i filtri calcolati al frame e calcola gli MFCC
- * pIn: 	puntatore al frame
- * pOut: 	puntatore al buffer di uscita, lungo nFilt
- * inLen: 	lunghezza del frame
- * nFilt:	numero di filtri
- * filtri:	puntatore all'array di handle dei filtri
- */
-void estrazione(
+}
+
+void estrazione2(
 		float32_t * pIn,
 		float32_t * pOut,
 		uint16_t inLen,
@@ -255,15 +252,22 @@ void estrazione(
 			*(temp2+n)+=*(tempdisp+i+(filtri+n)->fstart);
 
 		}
-		*(temp2+n)=log10f(*(temp2+n));
+		*(temp2+n)=logf(*(temp2+n));
 
+
+
+
+
+		//arm_fill_f32(0.0f,filtrato,inLen);	// riempie l'array temp di 0
+		//arm_copy_f32(&(temppari[(filtri+n+1)->fstart]),&filtrato[(filtri+n+1)->fstart],(filtri+n+1)->len);
+		// copia il filtro ennesimo in temp al punto giusto
 		*(temp2+n+1)=0;
 		for (int i = 0; i < (filtri+n+1)->len; ++i) 	 	// somma tutti i campioni e
 		{									 	// calcola il log
 			*(temp2+n+1)+=*(temppari+i+(filtri+n+1)->fstart);
 
 		}
-		*(temp2+n+1)=log10f(*(temp2+n+1));
+		*(temp2+n+1)=logf(*(temp2+n+1));
 	}
 
 	arm_matrix_instance_f32 DCTPMat={NFILT, NFILT, DCTParam};

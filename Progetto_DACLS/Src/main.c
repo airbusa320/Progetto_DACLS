@@ -4,68 +4,64 @@
  * @file           : main.c
  * @brief          : Main program body
  ******************************************************************************
- * This notice applies to any and all portions of this file
+ ** This notice applies to any and all portions of this file
  * that are not between comment pairs USER CODE BEGIN and
  * USER CODE END. Other portions of this file, whether
  * inserted by the user or by software development tools
  * are owned by their respective copyright owners.
  *
- * Copyright (c) 2018 STMicroelectronics International N.V.
- * All rights reserved.
+ * COPYRIGHT(c) 2018 STMicroelectronics
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted, provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *   1. Redistributions of source code must retain the above copyright notice,
+ *      this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright notice,
+ *      this list of conditions and the following disclaimer in the documentation
+ *      and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its contributors
+ *      may be used to endorse or promote products derived from this software
+ *      without specific prior written permission.
  *
- * 1. Redistribution of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of STMicroelectronics nor the names of other
- *    contributors to this software may be used to endorse or promote products
- *    derived from this software without specific written permission.
- * 4. This software, including modifications and/or derivative works of this
- *    software, must execute solely and exclusively on microcontroller or
- *    microprocessor devices manufactured by or for STMicroelectronics.
- * 5. Redistribution and use of this software other than as permitted under
- *    this license is void and will automatically terminate your rights under
- *    this license.
- *
- * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
- * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
- * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************
  */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_hal.h"
-#include "crc.h"
 #include "dma.h"
-#include "i2s.h"
-#include "pdm2pcm.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
 
+#include "stdlib.h"
+#include "math.h"
+#define ARM_MATH_CM4
+#include "VAD.h"
+#include "arm_math.h"
+#include "arm_const_structs.h"
+//#include "data_spectrum.h"
+//#include "MFCC.h"
+//#include "libmfcc.h"
 #include "core_cm4.h"
 #include "Cepstrum.h"
 #include "Rete_MLP.h"
-#include "my_lib.h"
+#include "standard.h"
+//#include "Canale_destro_sinistro.h"
 
-
-
+#define VAD
 
 /* USER CODE END Includes */
 
@@ -78,7 +74,17 @@
 
 
 
+uint8_t result;
+uint8_t stringa[10]={0};
+//uint8_t mark[158];
 
+//uint8_t coeff = 1;
+//float32_t mfcc_result[40];
+
+uint8_t ingresso[1024*2/**2*/*4];
+uint8_t framebuff[1024*2/**2*/*4];
+//event_flag evento=0;
+uint8_t evento=0;
 
 /* USER CODE END PV */
 
@@ -91,7 +97,8 @@ void SystemClock_Config(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
+uint16_t FRAME_LENGTH=512;
+uint32_t i;
 /* USER CODE END 0 */
 
 /**
@@ -125,16 +132,60 @@ int main(void)
 	MX_GPIO_Init();
 	MX_DMA_Init();
 	MX_USART2_UART_Init();
-	MX_CRC_Init();
-	MX_PDM2PCM_Init();
-	MX_TIM3_Init();
-	MX_I2S2_Init();
+	MX_TIM2_Init();
 	/* USER CODE BEGIN 2 */
 
-	tFiltInit();			// Inizializza l'estrazione delle feature
-	rete_init();			// Inizializza la rete
 
-	StartAcquisition();		// Avvia l'acquisizione
+
+
+
+	//	ITM->PORT[0].u8=0;
+		tFiltInit();
+	//	ITM->PORT[0].u8=0;
+
+
+	//	float32_t in[1025]={0},out[NFILT],out2[NFILT];
+	//i=0;
+	HAL_UART_Receive_DMA(&huart2,ingresso,1024*2*4/**2*/);
+
+	//for (int var = 0; var < 4; ++var) {
+
+	/*	ITM->PORT[0].u8=1;
+	powerSpectrum(destro,2048,in);
+	ITM->PORT[0].u8=1;*/
+
+	//filtraggi(in,out,257,26,hfilt);
+	/*ITM->PORT[0].u8=2;
+	estrazione(in,out,1025,26,hfilt);
+	ITM->PORT[0].u8=2;*/
+
+	//powerSpectrum(seno,512,in);
+	/*ITM->PORT[0].u8=3;
+	estrazione2(in,out2,257,26,hfilt);
+	ITM->PORT[0].u8=3;*/
+	//}
+
+	/*marker culo;
+	for (int var = 0; var < sizeof(data)/4/1024; ++var) {
+		culo= VAD_AE(data+var*1024,1024);
+
+		if (culo==ATTIVO) {
+
+			HAL_Delay(1);
+		}
+		else
+		{
+			HAL_Delay(1);
+		}
+	}*/
+
+
+	//result=MLP(MFCC+1,80,64,64,64);
+
+	rete_init();
+	//event_flag evento=rete(MFCC);
+	//	ITM->PORT[0].u8=3;
+
 
 	/* USER CODE END 2 */
 
@@ -163,7 +214,6 @@ void SystemClock_Config(void)
 
 	RCC_OscInitTypeDef RCC_OscInitStruct;
 	RCC_ClkInitTypeDef RCC_ClkInitStruct;
-	RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
 
 	/**Configure the main internal regulator output voltage
 	 */
@@ -178,7 +228,7 @@ void SystemClock_Config(void)
 	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
 	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
 	RCC_OscInitStruct.PLL.PLLM = 4;
-	RCC_OscInitStruct.PLL.PLLN = 174;
+	RCC_OscInitStruct.PLL.PLLN = 180;
 	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
 	RCC_OscInitStruct.PLL.PLLQ = 2;
 	RCC_OscInitStruct.PLL.PLLR = 2;
@@ -208,13 +258,6 @@ void SystemClock_Config(void)
 		_Error_Handler(__FILE__, __LINE__);
 	}
 
-	PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2S_APB1;
-	PeriphClkInitStruct.I2sApb1ClockSelection = RCC_I2SAPB1CLKSOURCE_PLLR;
-	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-	{
-		_Error_Handler(__FILE__, __LINE__);
-	}
-
 	/**Configure the Systick interrupt time
 	 */
 	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
@@ -228,9 +271,79 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+float32_t buffersx[1024],bufferdx[1024],buffersum[1024],bufferdiff[1024];
+float32_t bufferpspec[513],MFCC[80];
+marker a;
+void process(uint8_t *in)
+{
+
+	for (int var = 0; var < 1024; var++) {
+		buffersx[var]=((float32_t*)in)[var*2];
+		bufferdx[var]=((float32_t*)in)[(var*2)+1];
+	}
+
+
+	arm_add_f32(bufferdx,buffersx,buffersum,1024);
+	a=VAD_AE(buffersum,1024);
+
+#ifdef VAD
+	if (a==ATTIVO)
+	{
+#endif
+
+		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
+		//HAL_Delay(1);
+
+		arm_sub_f32(bufferdx,buffersx,bufferdiff,1024);
+
+		powerSpectrum(bufferdx,NFFT,bufferpspec);
+		estrazione2(bufferpspec,MFCC,513,NFILT,NMFCC,hfilt);
+		powerSpectrum(buffersx,NFFT,bufferpspec);
+		estrazione2(bufferpspec,MFCC+20,513,NFILT,NMFCC,hfilt);
+		powerSpectrum(buffersum,NFFT,bufferpspec);
+		estrazione2(bufferpspec,MFCC+40,513,NFILT,NMFCC,hfilt);
+		powerSpectrum(bufferdiff,NFFT,bufferpspec);
+		estrazione2(bufferpspec,MFCC+60,513,NFILT,NMFCC,hfilt);
+
+		arm_sub_f32(MFCC, media, bufferpspec,80);
+		arm_mult_f32(bufferpspec,deviazione_standard_inv,MFCC,80);
+		evento=(uint8_t)rete(MFCC);
+
+		sprintf((char*)stringa,"%s",getEventName(evento));
+
+		HAL_UART_Transmit(&huart2,stringa,sizeof(stringa),1000);
+
+		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_SET);
+
+#ifdef VAD
+	}
+	else
+	{
+		HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,GPIO_PIN_RESET);
+	}
+#endif
 
 
 
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	ITM->PORT[0].u8=33;
+	arm_copy_f32 ((float32_t*)ingresso, (float32_t*)framebuff, 512);
+	arm_copy_f32 (((float32_t*)ingresso)+512, ((float32_t*)framebuff)+512, 512);
+	process(framebuff);
+	ITM->PORT[0].u8=34;
+}
+
+void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
+{
+	ITM->PORT[0].u8=33;
+	arm_copy_f32 (((float32_t*)ingresso)+512, (float32_t*)framebuff, 512);
+	arm_copy_f32 ((float32_t*)ingresso, ((float32_t*)framebuff)+512, 512);
+	process(framebuff);
+	ITM->PORT[0].u8=34;
+}
 
 /* USER CODE END 4 */
 

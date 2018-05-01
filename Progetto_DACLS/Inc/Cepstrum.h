@@ -44,13 +44,13 @@ typedef struct {
 ftri_handle hfilt[NFILT];
 
 arm_fir_instance_f32 prem;
-float32_t prestato[1025];
+float32_t prestato[2049];
 
 void tFiltInit();
 
 void powerSpectrum(float32_t * pIn, uint16_t len, float32_t * pOut);
-void estrazionevecchio(float32_t * pIn, float32_t * pOut, uint16_t inLen, uint16_t nFilt, ftri_handle * filtri);
-void estrazione(float32_t * pIn, float32_t * pOut, uint16_t inLen, uint16_t nFilt, uint16_t nMFFC, ftri_handle * filtri);
+void estrazione(float32_t * pIn, float32_t * pOut, uint16_t inLen, uint16_t nFilt, ftri_handle * filtri);
+void estrazione2(float32_t * pIn, float32_t * pOut, uint16_t inLen, uint16_t nFilt, uint16_t nMFFC, ftri_handle * filtri);
 void parametriDCT();
 
 #endif /* CEPSTRUM_H_ */

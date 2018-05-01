@@ -100,37 +100,38 @@ uint8_t MLP(float32_t* MFcc, uint8_t Lenght_MFcc, uint8_t i,uint8_t t,uint8_t l 
 mlp_status rete_init()
 {
 	hlayer[0].activation=TANH;
-	hlayer[0].len=180;
+	hlayer[0].len=64;
 	hlayer[0].nin=80;
 	hlayer[0].pesi.numCols=hlayer[0].nin+1;
 	hlayer[0].pesi.numRows=hlayer[0].len;
-	hlayer[0].pesi.pData=(float32_t *)Weight_array;
+	hlayer[0].pesi.pData=Weight_array;
 
 	hlayer[1].activation=TANH;
-	hlayer[1].len=180;
-	hlayer[1].nin=180;
+	hlayer[1].len=64;
+	hlayer[1].nin=64;
 	hlayer[1].pesi.numCols=hlayer[1].nin+1;
 	hlayer[1].pesi.numRows=hlayer[1].len;
 	hlayer[1].pesi.pData=hlayer[0].pesi.pData+((hlayer[0].nin+1)*hlayer[0].len);
 
 	hlayer[2].activation=TANH;
-	hlayer[2].len=180;
-	hlayer[2].nin=180;
+	hlayer[2].len=64;
+	hlayer[2].nin=64;
 	hlayer[2].pesi.numCols=hlayer[2].nin+1;
 	hlayer[2].pesi.numRows=hlayer[2].len;
 	hlayer[2].pesi.pData=hlayer[1].pesi.pData+((hlayer[1].nin+1)*hlayer[1].len);
 
 	hlayer[3].activation=SOFTMAX;
 	hlayer[3].len=11;
-	hlayer[3].nin=180;
+	hlayer[3].nin=64;
 	hlayer[3].pesi.numCols=hlayer[3].nin+1;
 	hlayer[3].pesi.numRows=hlayer[3].len;
 	hlayer[3].pesi.pData=hlayer[2].pesi.pData+((hlayer[2].nin+1)*hlayer[2].len);
 
 	return TUTTO_OK;
+
 }
 
-float32_t buffer[200];
+float32_t buffer[128];
 
 /* calcola l'uscita del layer
  * handle: puntatore al handle
@@ -180,7 +181,7 @@ mlp_status layer(mlp_handle* handle, float32_t *in, float32_t *out )
 
 event_flag rete(float32_t * in)
 {
-	float32_t temp[200],temp2[200]; // buffer provvisori
+	float32_t temp[65],temp2[65]; // buffer provvisori
 
 	if (layer(&hlayer[0],in,temp)!= TUTTO_OK)
 	{
@@ -239,21 +240,23 @@ void softmax(float32_t* in, float32_t* out,uint16_t len)
 
 const char* getEventName(event_flag eve)
 {
-	switch (eve)
-	{
-	case RUSTLING: 		return "(object) Rustling";
-	case SNAPPING: 		return "(object) Snapping";
-	case CUPBOARD: 		return "Cupboard";
-	case CUTLERY: 		return "Cutlery";
-	case DISHES: 		return "Dishes";
-	case DRAWER: 		return "Drawer";
-	case GLASS: 		return "Glass jingling";
-	case IMPACT: 		return "Object impact";
-	case WALKING: 		return "People walking";
-	case WASHINGDISHES: return "Washingdishes";
-	case WATERTAP: 		return "Water tap running";
-	default: 			return "rotto";
-	}
+   switch (eve)
+   {
+      case UNO: return "Uno";
+      case DUE: return "Due";
+      case TRE: return "Tre" ;
+      case QUATTRO: return "Quattro" ;
+      case CINQUE: return "Cinque" ;
+      case SEI: return "Sei" ;
+      case SETTE: return "Sette" ;
+      case OTTO: return "Otto" ;
+      case NOVE: return "Nove" ;
+      case DIECI: return "Dieci" ;
+      case UNDICI: return "Undici" ;
+      default: return "rotto";
+   }
+
+
 }
 
 

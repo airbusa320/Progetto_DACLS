@@ -31,17 +31,17 @@ typedef enum
 typedef enum
 {
 	error=-1,
-	RUSTLING=0,
-	SNAPPING=1,
-	CUPBOARD=2,
-	CUTLERY=3,
-	DISHES=4,
-	DRAWER=5,
-	GLASS=6,
-	IMPACT=7,
-	WALKING=8,
-	WASHINGDISHES=9,
-	WATERTAP=10
+	UNO=0,
+	DUE=1,
+	TRE=2,
+	QUATTRO=3,
+	CINQUE=4,
+	SEI=5,
+	SETTE=6,
+	OTTO=7,
+	NOVE=8,
+	DIECI=9,
+	UNDICI=10
 } event_flag;
 
 typedef enum
