@@ -16,6 +16,7 @@
 #define ARM_MATH_CM4
 #include "arm_math.h"
 
+#define MAXINT16 32768
 
 enum
 {

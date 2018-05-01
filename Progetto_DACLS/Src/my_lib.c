@@ -105,8 +105,8 @@ void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s)
 		((uint8_t *)(PDMbuff))[(index*2)+1] = Channel_Demux[(a>>1) & CHANNEL_DEMUX_MASK] | Channel_Demux[(b>>1) & CHANNEL_DEMUX_MASK] << 4;
 	}
 
-	PDM2PCM((uint8_t *)PDMbuff, (uint8_t *)PCMbuffsx);
-	PDM2PCM((uint8_t *)PDMbuff+1, (uint8_t *)PCMbuffdx);
+	PDM_Filter((uint8_t *)PDMbuff, (uint8_t *)PCMbuffsx, &PDM1_filter_handler);
+	PDM_Filter((uint8_t *)PDMbuff+1, (uint8_t *)PCMbuffdx, &PDM1_filter_handler);
 
 	Process();
 }
@@ -121,10 +121,10 @@ void int2float(int16_t * psrc, float32_t * pDst, uint16_t size)
 	while(blkCnt > 0u)
 	{
 
-		*pDst++ = ((float32_t)*pin++) / 32768;
-		*pDst++ = ((float32_t)*pin++) / 32768;
-		*pDst++ = ((float32_t)*pin++) / 32768;
-		*pDst++ = ((float32_t)*pin++) / 32768;
+		*pDst++ = ((float32_t)*pin++) / MAXINT16;
+		*pDst++ = ((float32_t)*pin++) / MAXINT16;
+		*pDst++ = ((float32_t)*pin++) / MAXINT16;
+		*pDst++ = ((float32_t)*pin++) / MAXINT16;
 
 		/* Decrement the loop counter */
 		blkCnt--;
@@ -134,7 +134,7 @@ void int2float(int16_t * psrc, float32_t * pDst, uint16_t size)
 	while(blkCnt > 0u)
 	{
 
-		*pDst++ = ((float32_t)*pin++) / 32768;
+		*pDst++ = ((float32_t)*pin++) / MAXINT16;
 
 		/* Decrement the loop counter */
 		blkCnt--;
